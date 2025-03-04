@@ -26,6 +26,7 @@ public class SplashActivity extends AppCompatActivity {
     }
 
     public void goToLoginPage(View view) {
-
+        Intent intent = new Intent(SplashActivity.this, MainActivity.class); //create Intent & set target Activity
+        startActivity(intent); // start Intent
     }
 }
