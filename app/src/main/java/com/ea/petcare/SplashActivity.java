@@ -24,4 +24,8 @@ public class SplashActivity extends AppCompatActivity {
 //        });
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> insets);
     }
+
+    public void goToLoginPage(View view) {
+
+    }
 }

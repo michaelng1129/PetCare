@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="32dp"
         android:background="@drawable/blue_btn_bg"
+        android:onClick="goToLoginPage"
         android:text="Continue"
         android:textColor="@color/white"
         android:textSize="18sp"
