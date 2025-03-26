@@ -9,7 +9,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +34,11 @@ public class SplashFragment extends Fragment {
 
         // Call setup animations after the view is created
         setupAnimations(view);
+
+        new Handler(Looper.getMainLooper()).postDelayed(() -> {
+            NavController navController = Navigation.findNavController(requireView());
+            navController.navigate(R.id.action_splashFragment_to_viewPagerFragment);
+        }, 1000);
     }
 
     private void setupAnimations(View view) {
@@ -44,20 +53,20 @@ public class SplashFragment extends Fragment {
         View dot2 = view.findViewById(R.id.loading_dot2);
         View dot3 = view.findViewById(R.id.loading_dot3);
 
-        Animator dotAnim1 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
-        dotAnim1.setTarget(dot1);
+        Animator dotAnimator1 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
+        dotAnimator1.setTarget(dot1);
 
-        Animator dotAnim2 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
-        dotAnim2.setTarget(dot2);
-        dotAnim2.setStartDelay(300);
+        Animator dotAnimator2 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
+        dotAnimator2.setTarget(dot2);
+        dotAnimator2.setStartDelay(300);
 
 
-        Animator dotAnim3 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
-        dotAnim3.setTarget(dot3);
-        dotAnim3.setStartDelay(600);
+        Animator dotAnimator3 = AnimatorInflater.loadAnimator(getContext(), R.animator.loading_dot_animation);
+        dotAnimator3.setTarget(dot3);
+        dotAnimator3.setStartDelay(600);
 
         AnimatorSet animatorSet = new AnimatorSet();
-        animatorSet.playTogether(dotAnim1, dotAnim2, dotAnim3);
+        animatorSet.playTogether(dotAnimator1, dotAnimator2, dotAnimator3);
         animatorSet.start();
 
         // Fade in animations for text

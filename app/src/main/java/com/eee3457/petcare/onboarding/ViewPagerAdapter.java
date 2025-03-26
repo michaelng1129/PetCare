@@ -6,14 +6,14 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-import java.util.ArrayList;
+import java.util.List;
 
 public class ViewPagerAdapter extends FragmentStateAdapter {
-    private final ArrayList<Fragment> fragmentList;
+    private final List<Fragment> fragmentList;
 
-    public ViewPagerAdapter(@NonNull FragmentManager fm, @NonNull Lifecycle lc, ArrayList<Fragment> data) {
+    public ViewPagerAdapter(@NonNull FragmentManager fm, @NonNull Lifecycle lc, List<Fragment> fragments) {
         super(fm, lc);
-        this.fragmentList = data;
+        this.fragmentList = fragments;
     }
 
     @NonNull
