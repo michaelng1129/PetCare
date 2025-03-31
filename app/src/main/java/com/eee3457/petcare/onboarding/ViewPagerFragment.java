@@ -10,14 +10,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.eee3457.petcare.R;
-import com.tbuonomo.viewpagerdotsindicator.DotsIndicator;
+import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator;
 
 import java.util.ArrayList;
 
 
 public class ViewPagerFragment extends Fragment {
     private ViewPager2 viewPager;
-    private DotsIndicator dotsIndicator;
+    private WormDotsIndicator wormDotsIndicator;
     private ViewPagerAdapter adapter;
 
     @Override
@@ -26,7 +26,7 @@ public class ViewPagerFragment extends Fragment {
         View view =  inflater.inflate(R.layout.fragment_view_pager, container, false);
 
         viewPager = view.findViewById(R.id.view_pager);
-        dotsIndicator = view.findViewById(R.id.dots_indicator);
+        wormDotsIndicator = view.findViewById(R.id.worm_dots_indicator);
 
         ArrayList<Fragment> fragmentList = new ArrayList<>();
         fragmentList.add(new FirstScreen());
@@ -36,7 +36,7 @@ public class ViewPagerFragment extends Fragment {
         adapter = new ViewPagerAdapter(getChildFragmentManager(), getLifecycle(), fragmentList);
         viewPager.setAdapter(adapter);
 
-        dotsIndicator.attachTo(viewPager);
+        wormDotsIndicator.attachTo(viewPager);
         return view;
     }
 }
