@@ -10,4 +10,6 @@
     <color name="white">#FFFFFF</color>
     <color name="error">#EF5350</color>
     <color name="success">#66BB6A</color>
+    <color name="setting_stroke">#949494</color>
+    <color name="setting_small_bg">#EEEEEE</color>
 </resources>

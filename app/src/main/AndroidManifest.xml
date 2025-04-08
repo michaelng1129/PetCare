@@ -13,6 +13,12 @@
         android:theme="@style/Theme.PetCare"
         tools:targetApi="31">
         <activity
+            android:name=".settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".auth.OTPVerifyActivity"
+            android:exported="false" />
+        <activity
             android:name=".auth.SignUpActivity"
             android:exported="false" />
         <activity
