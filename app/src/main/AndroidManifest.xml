@@ -13,19 +13,7 @@
         android:theme="@style/Theme.PetCare"
         tools:targetApi="31">
         <activity
-            android:name=".settings.SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.OTPVerifyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.SignUpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".auth.LoginActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
+            android:name=".startactivity.StartActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,6 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-    </application>
+        <activity
+            android:name=".mainactivity.settings.SettingsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".mainactivity.MainActivity"
+            android:exported="true">
 
+        </activity>
+    </application>
 </manifest>

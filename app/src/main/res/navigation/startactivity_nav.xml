@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/startactivity_nav"
+    app:startDestination="@id/splashFragment">
+
+    <fragment
+        android:id="@+id/splashFragment"
+        android:name="com.eee3457.petcare.startactivity.StartSplashFragment"
+        android:label="fragment_splash"
+        tools:layout="@layout/fragment_start_splash">
+        <action
+            android:id="@+id/action_splashFragment_to_viewPagerFragment"
+            app:destination="@id/viewPagerFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/viewPagerFragment"
+        android:name="com.eee3457.petcare.startactivity.onboarding.ViewPagerFragment"
+        android:label="fragment_view_pager"
+        tools:layout="@layout/fragment_view_pager">
+        <action
+            android:id="@+id/action_startThirdScreen_to_startLoginScreen"
+            app:destination="@id/startLoginScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/startLoginScreen"
+        android:name="com.eee3457.petcare.startactivity.auth.StartLoginScreen"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_start_login_screen">
+        <action
+            android:id="@+id/action_startLoginScreen_to_startSignUpScreen"
+            app:destination="@id/startSignUpScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/startSignUpScreen"
+        android:name="com.eee3457.petcare.startactivity.auth.StartSignUpScreen"
+        android:label="fragment_start_sign_up_screen"
+        tools:layout="@layout/fragment_start_sign_up_screen">
+        <action
+            android:id="@+id/action_startSignUpScreen_to_startOTPVerifyScreen"
+            app:destination="@id/startOTPVerifyScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/startOTPVerifyScreen"
+        android:name="com.eee3457.petcare.startactivity.auth.StartOTPVerifyScreen"
+        android:label="fragment_start_otpverify_screen"
+        tools:layout="@layout/fragment_start_otpverify_screen" />
+
+</navigation>

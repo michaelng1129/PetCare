@@ -1,4 +1,4 @@
-package com.eee3457.petcare;
+package com.eee3457.petcare.startactivity;
 
 import android.animation.Animator;
 import android.animation.AnimatorInflater;
@@ -18,14 +18,16 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-public class SplashFragment extends Fragment {
+import com.eee3457.petcare.R;
+
+public class StartSplashFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_splash, container, false);
+        return inflater.inflate(R.layout.fragment_start_splash, container, false);
     }
 
     @Override

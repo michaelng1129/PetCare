@@ -1,4 +1,4 @@
-package com.eee3457.petcare.onboarding;
+package com.eee3457.petcare.startactivity.onboarding;
 
 import android.os.Bundle;
 
@@ -29,9 +29,9 @@ public class ViewPagerFragment extends Fragment {
         wormDotsIndicator = view.findViewById(R.id.worm_dots_indicator);
 
         ArrayList<Fragment> fragmentList = new ArrayList<>();
-        fragmentList.add(new FirstScreen());
-        fragmentList.add(new SecondScreen());
-        fragmentList.add(new ThirdScreen());
+        fragmentList.add(new StartFirstScreen());
+        fragmentList.add(new StartSecondScreen());
+        fragmentList.add(new StartThirdScreen());
 
         adapter = new ViewPagerAdapter(getChildFragmentManager(), getLifecycle(), fragmentList);
         viewPager.setAdapter(adapter);

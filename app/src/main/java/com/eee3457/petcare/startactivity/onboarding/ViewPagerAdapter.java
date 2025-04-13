@@ -1,4 +1,4 @@
-package com.eee3457.petcare.onboarding;
+package com.eee3457.petcare.startactivity.onboarding;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;

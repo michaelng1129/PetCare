@@ -4,9 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/start_otpverify_screen"
     android:background="@color/white"
     android:padding="32dp"
-    tools:context=".auth.OTPVerifyActivity">
+    tools:context=".startactivity.auth.StartOTPVerifyScreen">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/OTPVerify_header"

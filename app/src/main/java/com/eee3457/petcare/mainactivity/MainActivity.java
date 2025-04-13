@@ -1,12 +1,11 @@
-package com.eee3457.petcare;
+package com.eee3457.petcare.mainactivity;
 
 import android.os.Bundle;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
+import com.eee3457.petcare.R;
 
 public class MainActivity extends AppCompatActivity {
 
