@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mainactivity_nav"
+    app:startDestination="@id/mainHomeScreen">
+
+    <fragment
+        android:id="@+id/mainHomeScreen"
+        android:name="com.eee3457.petcare.mainactivity.home.MainHomeScreen"
+        android:label="fragment_main_home_screen"
+        tools:layout="@layout/fragment_main_home_screen" />
+    <fragment
+        android:id="@+id/mainCareScreen"
+        android:name="com.eee3457.petcare.mainactivity.care.MainCareScreen"
+        android:label="fragment_main_care_screen"
+        tools:layout="@layout/fragment_main_care_screen" />
+    <fragment
+        android:id="@+id/mainSettingsScreen"
+        android:name="com.eee3457.petcare.mainactivity.settings.MainSettingsScreen"
+        android:label="fragment_main_settings_screen"
+        tools:layout="@layout/fragment_main_settings_screen" />
+</navigation>

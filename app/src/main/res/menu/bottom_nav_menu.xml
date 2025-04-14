@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/mainHomeScreen"
+        android:icon="@drawable/ic_home"
+        android:title="Home" />
+    <item
+        android:id="@+id/mainCareScreen"
+        android:icon="@drawable/ic_local_hospital"
+        android:title="Care" />
+    <item
+        android:id="@+id/mainSettingsScreen"
+        android:icon="@drawable/ic_settings"
+        android:title="Settings" />
+</menu>
