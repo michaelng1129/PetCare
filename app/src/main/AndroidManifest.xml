@@ -22,9 +22,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".mainactivity.settings.SettingsActivity"
-            android:exported="false" />
-        <activity
             android:name=".mainactivity.MainActivity"
             android:exported="true">
 

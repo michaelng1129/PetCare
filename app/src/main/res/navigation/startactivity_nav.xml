@@ -20,6 +20,9 @@
         android:label="fragment_view_pager"
         tools:layout="@layout/fragment_view_pager">
         <action
+            android:id="@+id/action_startFirstScreen_to_startLoginScreen"
+            app:destination="@id/startLoginScreen" />
+        <action
             android:id="@+id/action_startThirdScreen_to_startLoginScreen"
             app:destination="@id/startLoginScreen" />
     </fragment>
