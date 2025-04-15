@@ -50,16 +50,16 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout clinicsContainer;
     private LatLng lastSearchedLocation;
-    private static final float SEARCH_DISTANCE_THRESHOLD = 500;
-    private static final float MAX_DISPLAY_DISTANCE_KM = 5.0f;
+    private static final float SEARCH_DISTANCE_THRESHOLD = 5000; // Meters
+    private static final float MAX_DISPLAY_DISTANCE_KM = 5.0f; // Max display distance 5 km
 
-    // 權限請求
+    // Permission request launcher
     private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher =
             registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
                 if (isGranted) {
                     enableLocationFeatures();
                 } else {
-                    Toast.makeText(requireContext(), "需要位置權限以顯示附近獸醫店", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Location permission required to show nearby vet clinics", Toast.LENGTH_SHORT).show();
                     setMapToDefaultLocation();
                 }
             });
@@ -73,23 +73,23 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main_care_screen, container, false);
 
-        // 初始化位置服務
+        // Initialize location services
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext());
 
-        // 初始化 CardView 容器
+        // Initialize CardView container
         clinicsContainer = view.findViewById(R.id.clinics_container);
         if (clinicsContainer == null) {
             Log.e("MainCareScreen", "clinicsContainer is null, check layout XML");
-            Toast.makeText(requireContext(), "布局錯誤：無法找到容器", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Layout error: Container not found", Toast.LENGTH_SHORT).show();
         }
 
-        // 初始化地圖
+        // Initialize map
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         } else {
             Log.e("MainCareScreen", "SupportMapFragment not found in layout");
-            Toast.makeText(requireContext(), "無法載入地圖", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Failed to load map", Toast.LENGTH_SHORT).show();
         }
 
         return view;
@@ -100,10 +100,10 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
         mMap = googleMap;
         mMap.setOnCameraIdleListener(this);
 
-        // 初始顯示預設位置
+        // Set initial default location
         setMapToDefaultLocation();
 
-        // 檢查位置權限
+        // Check location permission
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             enableLocationFeatures();
@@ -114,17 +114,17 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
     private void enableLocationFeatures() {
         try {
-            // 啟用“我的位置”按鈕
+            // Enable "My Location" button
             if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION)
                     == PackageManager.PERMISSION_GRANTED) {
                 mMap.setMyLocationEnabled(true);
             }
 
-            // 設置當前位置並搜尋獸醫店
+            // Set map to current location and search for vet clinics
             setMapToCurrentLocation();
         } catch (SecurityException e) {
             Log.e("MainCareScreen", "SecurityException: " + e.getMessage());
-            Toast.makeText(requireContext(), "位置權限錯誤", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Location permission error", Toast.LENGTH_SHORT).show();
             setMapToDefaultLocation();
         }
     }
@@ -140,11 +140,11 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         searchNearbyVetClinicsWithNearbySearch(currentLocation);
                     } else {
                         setMapToDefaultLocation();
-                        Toast.makeText(requireContext(), "無法獲取當前位置，使用預設位置", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Cannot get current location, using default location", Toast.LENGTH_SHORT).show();
                     }
                 }).addOnFailureListener(e -> {
                     setMapToDefaultLocation();
-                    Toast.makeText(requireContext(), "位置錯誤: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Location error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             } else {
                 setMapToDefaultLocation();
@@ -156,7 +156,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     }
 
     private void setMapToDefaultLocation() {
-        LatLng defaultLocation = new LatLng(22.3906452, 114.1980672); // 香港
+        LatLng defaultLocation = new LatLng(22.3906452, 114.1980672); // Hong Kong
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(defaultLocation, 15));
     }
 
@@ -180,21 +180,21 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     private void searchNearbyVetClinicsWithNearbySearch(LatLng searchLocation) {
         lastSearchedLocation = searchLocation;
 
-        // 構建 Nearby Search URL
+        // Build Nearby Search URL
         String url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" +
                 "location=" + searchLocation.latitude + "," + searchLocation.longitude +
                 "&radius=5000" +
                 "&type=veterinary_care" +
                 "&key=" + getString(R.string.google_maps_key);
 
-        // 使用 OkHttp 發送請求
+        // Send request using OkHttp
         OkHttpClient client = new OkHttpClient();
         Request request = new Request.Builder().url(url).build();
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "無法獲取獸醫店: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Failed to fetch vet clinics: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
             }
 
@@ -202,7 +202,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "搜尋失敗: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Search failed: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
                     });
                     return;
                 }
@@ -213,13 +213,14 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                     JSONArray results = jsonObject.getJSONArray("results");
                     List<Clinic> clinics = new ArrayList<>();
 
-                    for (int i = 0; i < results.length() && i < 10; i++) { // 限制最多 10 個診所
+                    // Limit to 10 clinics
+                    for (int i = 0; i < results.length() && i < 10; i++) {
                         JSONObject place = results.getJSONObject(i);
                         JSONObject geometry = place.getJSONObject("geometry");
                         JSONObject location = geometry.getJSONObject("location");
                         double lat = location.getDouble("lat");
                         double lng = location.getDouble("lng");
-                        String name = place.optString("name", "未知名稱");
+                        String name = place.optString("name", "Unknown name");
                         double rating = place.optDouble("rating", 0.0);
                         int reviews = place.optInt("user_ratings_total", 0);
                         JSONObject openingHours = place.optJSONObject("opening_hours");
@@ -229,11 +230,11 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         clinics.add(new Clinic(name, new LatLng(lat, lng), rating, reviews, openNow, placeId));
                     }
 
-                    // 獲取距離
+                    // Fetch distances
                     fetchDistances(searchLocation, clinics);
                 } catch (Exception e) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "JSON 解析錯誤: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "JSON parsing error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     });
                 }
             }
@@ -242,19 +243,19 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
     private float parseDistanceToKm(String distanceText) {
         try {
-            // 移除非數字和單位（例如 "1.2 miles" -> "1.2"）
+            // Remove non-numeric parts (e.g., "1.2 miles" -> "1.2")
             String numericPart = distanceText.replaceAll("[^0-9.]", "");
             float distance = Float.parseFloat(numericPart);
 
-            // 檢查單位（"km" 或 "miles"）
+            // Check unit ("km" or "miles")
             if (distanceText.toLowerCase().contains("mi")) {
-                // 英里轉公里（1 英里 = 1.60934 公里）
+                // Convert miles to kilometers (1 mile = 1.60934 km)
                 distance *= 1.60934f;
             }
             return distance;
         } catch (NumberFormatException e) {
-            Log.e("MainCareScreen", "無法解析距離: " + distanceText, e);
-            return Float.MAX_VALUE; // 無效距離，確保被過濾掉
+            Log.e("MainCareScreen", "Failed to parse distance: " + distanceText, e);
+            return Float.MAX_VALUE; // Invalid distance, ensure it’s filtered out
         }
     }
 
@@ -264,7 +265,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             return;
         }
 
-        // 構建 Distance Matrix URL
+        // Build Distance Matrix URL
         StringBuilder destinations = new StringBuilder();
         for (int i = 0; i < clinics.size(); i++) {
             Clinic clinic = clinics.get(i);
@@ -286,8 +287,8 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
                 requireActivity().runOnUiThread(() -> {
-                    Toast.makeText(requireContext(), "無法獲取距離: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                    updateUI(clinics); // 即使失敗也更新 UI
+                    Toast.makeText(requireContext(), "Failed to fetch distances: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    updateUI(clinics); // Update UI even on failure
                 });
             }
 
@@ -295,7 +296,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                 if (!response.isSuccessful()) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "距離請求失敗: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Distance request failed: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
                         updateUI(clinics);
                     });
                     return;
@@ -320,7 +321,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         }
                     }
 
-                    // 過濾距離 ≤ 5 公里的診所
+                    // Filter clinics within 5 km
                     List<Clinic> filteredClinics = new ArrayList<>();
                     for (Clinic clinic : clinics) {
                         float distanceKm = parseDistanceToKm(clinic.getDistanceText());
@@ -332,7 +333,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                     requireActivity().runOnUiThread(() -> updateUI(filteredClinics));
                 } catch (Exception e) {
                     requireActivity().runOnUiThread(() -> {
-                        Toast.makeText(requireContext(), "距離解析錯誤: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), "Distance parsing error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         updateUI(clinics);
                     });
                 }
@@ -343,32 +344,32 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     private void updateUI(List<Clinic> clinics) {
         if (clinicsContainer == null) {
             Log.e("MainCareScreen", "clinicsContainer is null in updateUI");
-            Toast.makeText(requireContext(), "容器未初始化", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Container not initialized", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 清空地圖和容器
+        // Clear map and container
         mMap.clear();
         clinicsContainer.removeAllViews();
 
-        // 如果無診所，顯示提示
+        // Show message if no clinics found
         if (clinics.isEmpty()) {
-            Toast.makeText(requireContext(), "附近 5 公里內無獸醫診所", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "No vet clinics within 5 km", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 更新地圖標記和 CardView
+        // Update map markers and CardView
         for (Clinic clinic : clinics) {
-            // 添加地圖標記
+            // Add map marker
             mMap.addMarker(new MarkerOptions()
                     .position(clinic.getLocation())
                     .title(clinic.getName()));
 
-            // 創建 CardView
+            // Create CardView
             View cardView = LayoutInflater.from(requireContext())
                     .inflate(R.layout.fragment_main_care_screen_clinic_card, clinicsContainer, false);
 
-            // 填充資料
+            // Populate data
             TextView nameText = cardView.findViewById(R.id.clinic_name);
             TextView distanceText = cardView.findViewById(R.id.clinic_distance);
             TextView hoursText = cardView.findViewById(R.id.clinic_hours);
@@ -379,13 +380,13 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
             nameText.setText(clinic.getName());
             distanceText.setText(clinic.getDistanceText() + " • " + clinic.getDurationText());
-            hoursText.setText(clinic.isOpenNow() ? "現正營業" : "目前關閉");
+            hoursText.setText(clinic.isOpenNow() ? "Open now" : "Closed");
             ratingText.setText(getStarRating(clinic.getRating()));
             reviewsText.setText("(" + clinic.getReviews() + " reviews)");
 
-            // 按鈕事件
+            // Button events
             callButton.setOnClickListener(v -> {
-                Toast.makeText(requireContext(), "電話功能待實現", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Call function not implemented", Toast.LENGTH_SHORT).show();
             });
 
             directionsButton.setOnClickListener(v -> {
@@ -395,11 +396,11 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                 if (mapIntent.resolveActivity(requireContext().getPackageManager()) != null) {
                     startActivity(mapIntent);
                 } else {
-                    Toast.makeText(requireContext(), "請安裝 Google 地圖", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Please install Google Maps", Toast.LENGTH_SHORT).show();
                 }
             });
 
-            // 添加到容器
+            // Add to container
             clinicsContainer.addView(cardView);
         }
     }
@@ -416,7 +417,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        // 清理地圖
+        // Clean up map
         if (mMap != null) {
             mMap.clear();
             mMap = null;
