@@ -43,4 +43,11 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
     implementation(libs.dotsindicator)
+    implementation(libs.play.services.maps)
+    implementation(libs.gms.play.services.location)
+    implementation(libs.places)
+    implementation(libs.okhttp)
+    implementation (libs.json)
+    implementation (libs.cardview)
+
 }
