@@ -2,13 +2,15 @@ package com.eee3457.petcare.mainactivity.care;
 
 import static com.eee3457.petcare.BuildConfig.MAPS_API_KEY;
 
+import android.app.AlertDialog;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Typeface;
+import android.content.pm.ResolveInfo;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
@@ -26,17 +28,18 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import android.Manifest;
-
 import com.eee3457.petcare.R;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -52,7 +55,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class MainCareScreen extends Fragment implements OnMapReadyCallback, GoogleMap.OnCameraIdleListener {
+public class MainCareScreen extends Fragment implements OnMapReadyCallback, GoogleMap.OnMyLocationButtonClickListener {
     private GoogleMap mMap;
     private FusedLocationProviderClient fusedLocationClient;
     private LinearLayout clinicsContainer;
@@ -61,11 +64,12 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     private static final float MAX_DISPLAY_DISTANCE_KM = 1.0f; // Max display distance 1 km
     private final OkHttpClient client = new OkHttpClient(); // Reusable OkHttpClient
     private final Handler handler = new Handler(Looper.getMainLooper());
-    private Runnable searchRunnable;
     private boolean isSearchCompleted = false; // Track search status
+    private boolean isSearching = false; // Prevent concurrent searches
+    private LocationCallback locationCallback; // For location updates
 
     // Permission request launcher
-    private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+    private final androidx.activity.result.ActivityResultLauncher<String> requestPermissionLauncher = registerForActivityResult(new androidx.activity.result.contract.ActivityResultContracts.RequestPermission(), isGranted -> {
         if (isGranted) {
             initializeLocationFeatures();
         } else {
@@ -108,22 +112,48 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         mMap = googleMap;
-        mMap.setOnCameraIdleListener(this);
+        mMap.getUiSettings().setScrollGesturesEnabled(false); // Disable map dragging
+        mMap.setOnMyLocationButtonClickListener(this);
         // Do not trigger search until permission is granted
         checkAndHandleLocationPermission();
     }
 
     private void checkAndHandleLocationPermission() {
-        if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(requireContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             initializeLocationFeatures();
         } else {
-            requestPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+            requestPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
     private void initializeLocationFeatures() {
         try {
             mMap.setMyLocationEnabled(true);
+            // Initialize location updates
+            locationCallback = new LocationCallback() {
+                @Override
+                public void onLocationResult(@NonNull LocationResult locationResult) {
+                    Location location = locationResult.getLastLocation();
+                    if (location != null) {
+                        LatLng newLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                        if (lastSearchedLocation == null || calculateDistance(lastSearchedLocation, newLocation) > SEARCH_DISTANCE_THRESHOLD) {
+                            if (!isSearching) {
+                                Log.d("MainCareScreen", "GPS location changed, updating map and searching: " + newLocation);
+                                float currentZoom = mMap.getCameraPosition().zoom;
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newLocation, currentZoom > 0 ? currentZoom : 15));
+                                searchNearbyVetClinicsWithNearbySearch(newLocation);
+                            }
+                        }
+                    }
+                }
+            };
+
+            LocationRequest locationRequest = new LocationRequest.Builder(2000) // Update every 2 seconds
+                    .setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
+
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+
+            // Initial location
             fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
                 if (location != null) {
                     LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
@@ -151,16 +181,31 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     }
 
     @Override
-    public void onCameraIdle() {
-        LatLng newLocation = mMap.getCameraPosition().target;
-        if (lastSearchedLocation == null || calculateDistance(lastSearchedLocation, newLocation) > SEARCH_DISTANCE_THRESHOLD) {
-            if (searchRunnable != null) {
-                handler.removeCallbacks(searchRunnable);
-            }
-            // Update map camera to new location
-            searchRunnable = () -> searchNearbyVetClinicsWithNearbySearch(newLocation);
-            handler.postDelayed(searchRunnable, 500);
+    public boolean onMyLocationButtonClick() {
+        if (isSearching) {
+            Log.d("MainCareScreen", "Search in progress, skipping my location button");
+            return false;
         }
+        try {
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    Log.d("MainCareScreen", "My location button clicked, moving to: " + currentLocation);
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15));
+                    searchNearbyVetClinicsWithNearbySearch(currentLocation);
+                } else {
+                    Toast.makeText(requireContext(), "Cannot get current location", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(e -> {
+                Toast.makeText(requireContext(), "Location error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            });
+        } catch (SecurityException e) {
+            Log.e("MainCareScreen", "SecurityException in getLastLocation: " + e.getMessage());
+            Toast.makeText(requireContext(), "Location permission error", Toast.LENGTH_SHORT).show();
+            setMapToDefaultLocation();
+        }
+
+        return false; // Allow default behavior
     }
 
     private float calculateDistance(LatLng loc1, LatLng loc2) {
@@ -197,6 +242,11 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     }
 
     private void searchNearbyVetClinicsWithNearbySearch(LatLng searchLocation) {
+        if (isSearching) {
+            Log.d("MainCareScreen", "Search in progress, skipping new search");
+            return;
+        }
+        isSearching = true;
         lastSearchedLocation = searchLocation;
         isSearchCompleted = false; // Reset search status
 
@@ -212,6 +262,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                     Log.e("MainCareScreen", "Failed to fetch vet clinics: " + e.getMessage(), e);
                     Toast.makeText(requireContext(), "Failed to fetch vet clinics: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     isSearchCompleted = true;
+                    isSearching = false;
                     updateUI(new ArrayList<>());
                 });
             }
@@ -223,6 +274,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         Log.e("MainCareScreen", "Search failed: HTTP " + response.code());
                         Toast.makeText(requireContext(), "Search failed: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
                         isSearchCompleted = true;
+                        isSearching = false;
                         updateUI(new ArrayList<>());
                     });
                     return;
@@ -256,11 +308,13 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
                     // Fetch distances
                     requireActivity().runOnUiThread(() -> fetchDistances(searchLocation, clinics));
+                    requireActivity().runOnUiThread(() -> fetchPhoneNumbers(searchLocation, clinics));
                 } catch (Exception e) {
                     requireActivity().runOnUiThread(() -> {
                         Log.e("MainCareScreen", "JSON parsing error in Nearby Search: " + e.getMessage(), e);
                         Toast.makeText(requireContext(), "JSON parsing error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         isSearchCompleted = true;
+                        isSearching = false;
                         updateUI(new ArrayList<>());
                     });
                 }
@@ -271,6 +325,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
     private void fetchDistances(LatLng origin, List<Clinic> clinics) {
         if (clinics.isEmpty()) {
             isSearchCompleted = true; // Mark search as completed
+            isSearching = false;
             updateUI(clinics);
             return;
         }
@@ -295,6 +350,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                     Log.e("MainCareScreen", "Failed to fetch distances: " + e.getMessage(), e);
                     Toast.makeText(requireContext(), "Failed to fetch distances: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                     isSearchCompleted = true;
+                    isSearching = false;
                     updateUI(clinics);
                 });
             }
@@ -306,6 +362,7 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         Log.e("MainCareScreen", "Distance request failed: HTTP " + response.code());
                         Toast.makeText(requireContext(), "Distance request failed: HTTP " + response.code(), Toast.LENGTH_SHORT).show();
                         isSearchCompleted = true;
+                        isSearching = false;
                         updateUI(clinics);
                     });
                     return;
@@ -341,15 +398,14 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                             filteredClinics.add(clinic);
                         }
                     }
-                    Collections.sort(filteredClinics, (c1, c2) -> Float.compare(
-                            parseDistanceToKm(c1.getDistanceText()),
-                            parseDistanceToKm(c2.getDistanceText())));
+                    Collections.sort(filteredClinics, (c1, c2) -> Float.compare(parseDistanceToKm(c1.getDistanceText()), parseDistanceToKm(c2.getDistanceText())));
 
                     // Log filtered and sorted clinics
                     Log.d("MainCareScreen", "Filtered and sorted " + filteredClinics.size() + " clinics within 1 km");
 
                     requireActivity().runOnUiThread(() -> {
                         isSearchCompleted = true; // Mark search as completed
+                        isSearching = false;
                         updateUI(filteredClinics);
                     });
                 } catch (Exception e) {
@@ -357,12 +413,56 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
                         Log.e("MainCareScreen", "JSON parsing error in Distance Matrix: " + e.getMessage(), e);
                         Toast.makeText(requireContext(), "Distance parsing error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                         isSearchCompleted = true;
+                        isSearching = false;
                         updateUI(clinics);
                     });
                 }
             }
         });
     }
+
+    private void fetchPhoneNumbers(LatLng searchLocation, List<Clinic> clinics) {
+        if (clinics.isEmpty()) {
+            fetchDistances(searchLocation, clinics);
+            return;
+        }
+
+        for (Clinic clinic : clinics) {
+            String placeId = clinic.getPlaceId();
+            String url = "https://maps.googleapis.com/maps/api/place/details/json?" + "place_id=" + placeId + "&fields=formatted_phone_number&key=" + MAPS_API_KEY;
+
+            Request request = new Request.Builder().url(url).build();
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                    Log.w("MainCareScreen", "Failed to fetch phone number for place_id: " + placeId);
+                    // Continue processing even if one request fails
+                }
+
+                @Override
+                public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                    if (!response.isSuccessful()) {
+                        Log.w("MainCareScreen", "Phone number request failed for place_id: " + placeId + ", HTTP " + response.code());
+                        return;
+                    }
+
+                    try {
+                        String json = response.body().string();
+                        JSONObject jsonObject = new JSONObject(json);
+                        JSONObject result = jsonObject.getJSONObject("result");
+                        String phoneNumber = result.optString("formatted_phone_number", null);
+                        clinic.setPhoneNumber(phoneNumber);
+                    } catch (Exception e) {
+                        Log.w("MainCareScreen", "JSON parsing error for phone number, place_id: " + placeId);
+                    }
+                }
+            });
+        }
+
+        // Delay fetching distances to allow phone number requests to complete
+        handler.postDelayed(() -> fetchDistances(searchLocation, clinics), 1000);
+    }
+
 
     private void updateUI(List<Clinic> clinics) {
         if (clinicsContainer == null) {
@@ -385,14 +485,12 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             noClinicsText.setText("No vet clinics found within 1 km"); // Use string resource
             noClinicsText.setTextSize(18); // Match nearby_clinics_title
             noClinicsText.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary_dark)); // Theme color
-            noClinicsText.setTypeface(null, Typeface.BOLD); // Match nearby_clinics_title
+            noClinicsText.setTypeface(null, android.graphics.Typeface.BOLD); // Match nearby_clinics_title
             noClinicsText.setGravity(Gravity.CENTER_HORIZONTAL); // Center horizontally
             noClinicsText.setPadding(16, 16, 16, 16); // Consistent padding
 
             // Set layout params with top margin
-            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
             params.topMargin = (int) (24 * requireContext().getResources().getDisplayMetrics().density); // 24dp
             noClinicsText.setLayoutParams(params);
 
@@ -405,7 +503,6 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
         clinicsContainer.setGravity(Gravity.TOP);
 
         // Update map markers and CardView
-        LatLngBounds.Builder boundsBuilder = new LatLngBounds.Builder();
         for (Clinic clinic : clinics) {
             // Validate location
             if (clinic.getLocation() == null) {
@@ -415,7 +512,6 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
             // Add map marker
             mMap.addMarker(new MarkerOptions().position(clinic.getLocation()).title(clinic.getName()));
-            boundsBuilder.include(clinic.getLocation());
 
             // Create CardView
             View cardView = LayoutInflater.from(requireContext()).inflate(R.layout.fragment_main_care_screen_clinic_card, clinicsContainer, false);
@@ -437,7 +533,43 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
 
             // Button events
             callButton.setOnClickListener(v -> {
-                Toast.makeText(requireContext(), "Call function not implemented", Toast.LENGTH_SHORT).show();
+                String phoneNumber = clinic.getPhoneNumber();
+                if (phoneNumber == null || phoneNumber.isEmpty()) {
+                    Toast.makeText(requireContext(), "Phone number not available", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Sanitize phone number for Hong Kong (8 digits, no country code)
+                String sanitizedPhoneNumber = phoneNumber.replaceAll("[^0-9]", "");
+                Log.d("MainCareScreen", "Original phone number: " + phoneNumber + ", Sanitized: " + sanitizedPhoneNumber);
+
+                // Validate Hong Kong phone number (8 digits)
+                if (sanitizedPhoneNumber.length() != 8 || !sanitizedPhoneNumber.matches("\\d{8}")) {
+                    Toast.makeText(requireContext(), "Invalid phone number format", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                // Show confirmation dialog before dialing
+                String internationalPhoneNumber = "+852" + sanitizedPhoneNumber;
+                new AlertDialog.Builder(requireContext())
+                        .setTitle("Call Clinic")
+                        .setMessage("Do you want to call " + clinic.getName() + " at " + sanitizedPhoneNumber + "?")
+                        .setPositiveButton("Call", (dialog, which) -> {
+                            // Create dial Intent
+                            Intent dialIntent = new Intent(Intent.ACTION_DIAL);
+                            dialIntent.setData(Uri.parse("tel:" + internationalPhoneNumber));
+
+                            // Attempt to start the dialer
+                            try {
+                                startActivity(dialIntent);
+                            } catch (ActivityNotFoundException e) {
+                                Log.e("MainCareScreen", "Failed to start dialer: " + e.getMessage());
+                                Toast.makeText(requireContext(), "Unable to open dialer", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton("Cancel", null)
+                        .setCancelable(true)
+                        .show();
             });
 
             directionsButton.setOnClickListener(v -> {
@@ -455,15 +587,19 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             clinicsContainer.addView(cardView);
         }
 
-        // Adjust map to show all markers
-        if (!clinics.isEmpty()) {
-            try {
-//                LatLngBounds bounds = boundsBuilder.build();
-//                mMap.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
-            } catch (IllegalStateException e) {
-                Log.w("MainCareScreen", "Cannot adjust bounds, insufficient points: " + e.getMessage());
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(lastSearchedLocation, 15));
-            }
+        // Center map on current location
+        try {
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    LatLng currentLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    float currentZoom = mMap.getCameraPosition().zoom;
+                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, currentZoom > 0 ? currentZoom : 15));
+                }
+            });
+        } catch (SecurityException e) {
+            Log.e("MainCareScreen", "SecurityException in getLastLocation: " + e.getMessage());
+            Toast.makeText(requireContext(), "Location permission error", Toast.LENGTH_SHORT).show();
+            setMapToDefaultLocation();
         }
     }
 
@@ -474,8 +610,8 @@ public class MainCareScreen extends Fragment implements OnMapReadyCallback, Goog
             mMap.clear();
             mMap = null;
         }
-        if (searchRunnable != null) {
-            handler.removeCallbacks(searchRunnable);
+        if (fusedLocationClient != null && locationCallback != null) {
+            fusedLocationClient.removeLocationUpdates(locationCallback);
         }
     }
 }

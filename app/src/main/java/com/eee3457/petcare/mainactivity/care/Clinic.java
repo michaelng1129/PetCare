@@ -11,6 +11,7 @@ public class Clinic {
     private String placeId;
     private String distanceText;
     private String durationText;
+    private String phoneNumber;
 
     public Clinic(String name, LatLng location, double rating, int reviews, boolean openNow, String placeId) {
         this.name = name;
@@ -19,8 +20,9 @@ public class Clinic {
         this.reviews = reviews;
         this.openNow = openNow;
         this.placeId = placeId;
-        this.distanceText = "距離未知";
-        this.durationText = "行車時間未知";
+        this.distanceText = "Unknown";
+        this.durationText = "Unknown";
+        this.phoneNumber = null;
     }
 
     // Getters
@@ -56,11 +58,19 @@ public class Clinic {
         return durationText;
     }
 
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
     public void setDistanceText(String distanceText) {
         this.distanceText = distanceText;
     }
 
     public void setDurationText(String durationText) {
         this.durationText = durationText;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 }
