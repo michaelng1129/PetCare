@@ -19,6 +19,7 @@ import androidx.navigation.Navigation;
 
 import com.eee3457.petcare.R;
 import com.eee3457.petcare.mainactivity.MainActivity;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -29,6 +30,7 @@ public class StartLoginScreen extends Fragment {
     private TextInputLayout emailLayout, passwordLayout;
     private MaterialButton loginButton;
     private FirebaseAuth mAuth;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -95,28 +97,23 @@ public class StartLoginScreen extends Fragment {
 
     private void loginWithFirebase(String email, String password) {
         loginButton.setEnabled(false);
-        mAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(requireActivity(), task -> {
-                    loginButton.setEnabled(true);
-                    if (task.isSuccessful()) {
-                        // Login successful, navigate to MainActivity
-                        Intent intent = new Intent(requireContext(), MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        requireActivity().finish();
-                    } else {
-                        String errorMessage = task.getException() != null ? task.getException().getMessage() : "Login failed";
-                        new AlertDialog.Builder(requireContext())
-                                .setTitle("Login Error")
-                                .setMessage("Failed to login: " + errorMessage)
-                                .setPositiveButton("OK", null)
-                                .show();
-                        if (errorMessage.contains("no user record")) {
-                            emailLayout.setError("No account found with this email");
-                        } else if (errorMessage.contains("password is invalid")) {
-                            passwordLayout.setError("Incorrect password");
-                        }
-                    }
-                });
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(requireActivity(), task -> {
+            loginButton.setEnabled(true);
+            if (task.isSuccessful()) {
+                // Login successful, navigate to MainActivity
+                Intent intent = new Intent(requireContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                requireActivity().finish();
+            } else {
+                String errorMessage = task.getException() != null ? task.getException().getMessage() : "Login failed";
+                new AlertDialog.Builder(requireContext()).setTitle("Login Error").setMessage("Failed to login: " + errorMessage).setPositiveButton("OK", null).show();
+                if (errorMessage.contains("no user record")) {
+                    emailLayout.setError("No account found with this email");
+                } else if (errorMessage.contains("password is invalid")) {
+                    passwordLayout.setError("Incorrect password");
+                }
+            }
+        });
     }
 }

@@ -23,6 +23,7 @@
             android:textColor="@color/primary_color"
             android:textSize="18sp"
             android:textStyle="bold"
+            app:drawableTint="@color/primary_color"
             app:drawableStartCompat="@drawable/ic_account_circle"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -71,10 +72,11 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/profile_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:text="John Smith"
+                        android:text=""
                         android:textColor="@color/text_light" />
 
                     <ImageView
@@ -119,10 +121,11 @@
                         android:textSize="16sp" />
 
                     <TextView
+                        android:id="@+id/email_address"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center_vertical"
-                        android:text="john.smith@example.com"
+                        android:text=""
                         android:textColor="@color/text_light" />
 
                     <ImageView
@@ -194,6 +197,7 @@
             android:textColor="@color/primary_dark"
             android:textSize="18sp"
             android:textStyle="bold"
+            app:drawableTint="@color/primary_color"
             app:drawableStartCompat="@drawable/ic_notifications"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/account_settings_card" />
@@ -239,7 +243,7 @@
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_vertical"
                         android:layout_marginStart="8dp"
                         android:checked="true" />
@@ -275,7 +279,7 @@
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_vertical"
                         android:checked="true" />
                 </LinearLayout>
@@ -310,7 +314,7 @@
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_vertical" />
                 </LinearLayout>
             </LinearLayout>
@@ -326,6 +330,7 @@
             android:textColor="@color/primary_dark"
             android:textSize="19sp"
             android:textStyle="bold"
+            app:drawableTint="@color/primary_color"
             app:drawableStartCompat="@drawable/ic_settings"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/notifications_settings_card" />
@@ -419,7 +424,7 @@
 
                     <com.google.android.material.switchmaterial.SwitchMaterial
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        android:layout_height="24dp"
                         android:layout_gravity="center_vertical" />
                 </LinearLayout>
 
