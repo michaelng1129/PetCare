@@ -15,17 +15,17 @@ import com.tbuonomo.viewpagerdotsindicator.WormDotsIndicator;
 import java.util.ArrayList;
 
 
-public class ViewPagerFragment extends Fragment {
+public class OnboardingViewPager extends Fragment {
     private ViewPager2 viewPager;
     private WormDotsIndicator wormDotsIndicator;
-    private ViewPagerAdapter adapter;
+    private OnboardingViewPagerAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View view =  inflater.inflate(R.layout.fragment_view_pager, container, false);
+        View view =  inflater.inflate(R.layout.fragment_start_onboarding_view_pager, container, false);
 
-        viewPager = view.findViewById(R.id.view_pager);
+        viewPager = view.findViewById(R.id.onboarding_view_pager);
         wormDotsIndicator = view.findViewById(R.id.worm_dots_indicator);
 
         ArrayList<Fragment> fragmentList = new ArrayList<>();
@@ -33,7 +33,7 @@ public class ViewPagerFragment extends Fragment {
         fragmentList.add(new StartSecondScreen());
         fragmentList.add(new StartThirdScreen());
 
-        adapter = new ViewPagerAdapter(getChildFragmentManager(), getLifecycle(), fragmentList);
+        adapter = new OnboardingViewPagerAdapter(getChildFragmentManager(), getLifecycle(), fragmentList);
         viewPager.setAdapter(adapter);
 
         wormDotsIndicator.attachTo(viewPager);

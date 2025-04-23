@@ -42,7 +42,7 @@ public class StartFirstScreen extends Fragment {
     }
 
     private void goToNextPage() {
-        ViewPager2 viewPager = requireActivity().findViewById(R.id.view_pager);
+        ViewPager2 viewPager = requireActivity().findViewById(R.id.onboarding_view_pager);
         viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
     }
 

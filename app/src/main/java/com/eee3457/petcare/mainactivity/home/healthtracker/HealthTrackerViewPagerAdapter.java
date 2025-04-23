@@ -1,4 +1,4 @@
-package com.eee3457.petcare.startactivity.onboarding;
+package com.eee3457.petcare.mainactivity.home.healthtracker;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -8,10 +8,10 @@ import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import java.util.List;
 
-public class ViewPagerAdapter extends FragmentStateAdapter {
+public class HealthTrackerViewPagerAdapter extends FragmentStateAdapter {
     private final List<Fragment> fragmentList;
 
-    public ViewPagerAdapter(@NonNull FragmentManager fm, @NonNull Lifecycle lc, List<Fragment> fragments) {
+    public HealthTrackerViewPagerAdapter(@NonNull FragmentManager fm, @NonNull Lifecycle lc, List<Fragment> fragments) {
         super(fm, lc);
         this.fragmentList = fragments;
     }

@@ -9,7 +9,11 @@
         android:id="@+id/mainHomeScreen"
         android:name="com.eee3457.petcare.mainactivity.home.MainHomeScreen"
         android:label="fragment_main_home_screen"
-        tools:layout="@layout/fragment_main_home_screen" />
+        tools:layout="@layout/fragment_main_home_screen" >
+        <action
+            android:id="@+id/action_mainHomeScreen_to_healthTrackerViewPager"
+            app:destination="@id/healthTrackerViewPager" />
+    </fragment>
     <fragment
         android:id="@+id/mainCareScreen"
         android:name="com.eee3457.petcare.mainactivity.care.MainCareScreen"
@@ -20,4 +24,8 @@
         android:name="com.eee3457.petcare.mainactivity.settings.MainSettingsScreen"
         android:label="fragment_main_settings_screen"
         tools:layout="@layout/fragment_main_settings_screen" />
+    <fragment
+        android:id="@+id/healthTrackerViewPager"
+        android:name="com.eee3457.petcare.mainactivity.home.healthtracker.HealthTrackerViewPager"
+        android:label="HealthTrackerViewPager" />
 </navigation>

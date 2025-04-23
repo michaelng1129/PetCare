@@ -16,9 +16,9 @@
     </fragment>
     <fragment
         android:id="@+id/viewPagerFragment"
-        android:name="com.eee3457.petcare.startactivity.onboarding.ViewPagerFragment"
+        android:name="com.eee3457.petcare.startactivity.onboarding.OnboardingViewPager"
         android:label="fragment_view_pager"
-        tools:layout="@layout/fragment_view_pager">
+        tools:layout="@layout/fragment_start_onboarding_view_pager">
         <action
             android:id="@+id/action_startFirstScreen_to_startLoginScreen"
             app:destination="@id/startLoginScreen" />

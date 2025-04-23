@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.Navigation;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,7 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.eee3457.petcare.R;
+import com.eee3457.petcare.mainactivity.home.healthtracker.HealthTrackerViewPager;
 import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,8 +60,26 @@ public class MainHomeScreen extends Fragment {
 
             containerLayout.addView(cardView);
         }
-    }
 
+        View healthAction = view.findViewById(R.id.health_action);
+        healthAction.setOnClickListener(v -> {
+            // Get NavController
+            NavController navController = Navigation.findNavController(view);
+
+            // Hide AppBarLayout and BottomNavigationView
+            AppBarLayout appBarLayout = requireActivity().findViewById(R.id.appBarLayout);
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottomNavigationView);
+            if (appBarLayout != null) {
+                appBarLayout.setVisibility(View.GONE);
+            }
+            if (bottomNav != null) {
+                bottomNav.setVisibility(View.GONE);
+            }
+
+            // Navigate to HealthTrackerViewPager
+            navController.navigate(R.id.action_mainHomeScreen_to_healthTrackerViewPager);
+        });
+    }
     private String convertMonthNumberToName(String monthNumber) {
         int month = Integer.parseInt(monthNumber);
         String[] months = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",

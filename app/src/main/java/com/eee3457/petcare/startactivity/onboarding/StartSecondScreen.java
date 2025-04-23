@@ -34,12 +34,12 @@ public class StartSecondScreen extends Fragment {
     }
 
     private void goToPreviousPage() {
-        ViewPager2 viewPager = requireActivity().findViewById(R.id.view_pager);
+        ViewPager2 viewPager = requireActivity().findViewById(R.id.onboarding_view_pager);
         viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
     }
 
     private void goToNextPage() {
-        ViewPager2 viewPager = requireActivity().findViewById(R.id.view_pager);
+        ViewPager2 viewPager = requireActivity().findViewById(R.id.onboarding_view_pager);
         viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
     }
 }
