@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -45,6 +46,9 @@ dependencies {
     implementation(libs.dotsindicator)
     implementation(libs.navigation.ui)
     implementation(libs.navigation.fragment)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.bom)
+    implementation(libs.google.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
