@@ -3,7 +3,6 @@ package com.eee3457.petcare.startactivity;
 import android.content.Intent;
 import android.os.Bundle;
 
-import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
@@ -30,8 +29,7 @@ public class StartActivity extends AppCompatActivity {
             finish();
         } else {
             // User is not logged in, proceed with navigation setup
-            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager()
-                    .findFragmentById(R.id.nav_host_fragment);
+            NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment);
             if (navHostFragment != null) {
                 NavController navController = navHostFragment.getNavController();
                 // Navigation is handled by startactivity_nav.xml
