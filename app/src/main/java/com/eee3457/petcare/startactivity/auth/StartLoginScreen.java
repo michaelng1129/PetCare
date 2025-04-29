@@ -10,26 +10,38 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.credentials.Credential;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.GetCredentialRequest;
+import androidx.credentials.GetCredentialResponse;
+import androidx.credentials.exceptions.GetCredentialException;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 
 import com.eee3457.petcare.R;
 import com.eee3457.petcare.mainactivity.MainActivity;
-import com.google.android.gms.common.SignInButton;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
+
+import java.util.concurrent.Executors;
+
 
 public class StartLoginScreen extends Fragment {
     private TextInputEditText emailInput, passwordInput;
     private TextInputLayout emailLayout, passwordLayout;
-    private MaterialButton loginButton;
+    private MaterialButton loginButton, googleSignInButton;
     private FirebaseAuth mAuth;
+    private CredentialManager credentialManager;
 
 
     @Override
@@ -44,12 +56,16 @@ public class StartLoginScreen extends Fragment {
         // Initialize Firebase
         mAuth = FirebaseAuth.getInstance();
 
+        // Initialize Credential Manager
+        credentialManager = CredentialManager.create(requireContext());
+
         // Initialize views
         emailLayout = view.findViewById(R.id.email_layout);
         passwordLayout = view.findViewById(R.id.password_layout);
         emailInput = view.findViewById(R.id.email_input);
         passwordInput = view.findViewById(R.id.password_input);
         loginButton = view.findViewById(R.id.login_button);
+        googleSignInButton = view.findViewById(R.id.google_button);
 
         // Set signup link click listener
         TextView signupLink = view.findViewById(R.id.signup_link);
@@ -64,6 +80,58 @@ public class StartLoginScreen extends Fragment {
                 String email = emailInput.getText().toString().trim();
                 String password = passwordInput.getText().toString().trim();
                 loginWithFirebase(email, password);
+            }
+        });
+
+        googleSignInButton.setOnClickListener(v -> signInWithGoogle());
+    }
+
+    private void signInWithGoogle() {
+        // Configure Google Sign-In options
+        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder().setFilterByAuthorizedAccounts(false).setServerClientId(getString(R.string.default_web_client_id)).setAutoSelectEnabled(true).build();
+
+        // Build Credential Manager request
+        GetCredentialRequest request = new GetCredentialRequest.Builder().addCredentialOption(googleIdOption).build();
+
+        // Execute Google Sign-In request with Credential Manager
+        credentialManager.getCredentialAsync(requireActivity(),  // Use requireActivity() instead of requireContext()
+                request, null,  // No cancellation signal needed
+                Executors.newSingleThreadExecutor(), new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
+                    @Override
+                    public void onResult(GetCredentialResponse result) {
+                        handleGoogleSignInResult(result);
+                    }
+
+                    @Override
+                    public void onError(GetCredentialException e) {
+                        requireActivity().runOnUiThread(() -> Toast.makeText(requireContext(), "Google Sign-In failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                    }
+                });
+    }
+
+    private void handleGoogleSignInResult(GetCredentialResponse result) {
+        Credential credential = result.getCredential();
+        if (credential instanceof GoogleIdTokenCredential) {
+            GoogleIdTokenCredential googleCredential = (GoogleIdTokenCredential) credential;
+            String idToken = googleCredential.getIdToken();
+            firebaseAuthWithGoogle(idToken);
+        } else {
+            Toast.makeText(requireContext(), "Invalid credential type", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+        mAuth.signInWithCredential(credential).addOnCompleteListener(requireActivity(), task -> {
+            if (task.isSuccessful()) {
+                // Sign-in successful, navigate to MainActivity
+                Intent intent = new Intent(requireContext(), MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+                requireActivity().finish();
+            } else {
+                String errorMessage = task.getException() != null ? task.getException().getMessage() : "Google Sign-In failed";
+                new AlertDialog.Builder(requireContext()).setTitle("Google Sign-In Error").setMessage("Failed to sign in with Google: " + errorMessage).setPositiveButton("OK", null).show();
             }
         });
     }
