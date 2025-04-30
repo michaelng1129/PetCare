@@ -48,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
             if (toolbarTitle != null) {
                 if (destination.getId() == R.id.mainHomeScreen) {
                     toolbarTitle.setText("Home");
+                } else if (destination.getId() == R.id.addPetScreen) {
+                    toolbarTitle.setText("Add Pet");
                 } else if (destination.getId() == R.id.healthTrackerViewPager) {
                     toolbarTitle.setText("Health");
                 } else if (destination.getId() == R.id.mainCareScreen) {
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             // Control AppBarLayout and BottomNavigationView visibility
-            if (destination.getId() == R.id.healthTrackerViewPager) {
+            if (destination.getId() == R.id.healthTrackerViewPager || destination.getId() == R.id.addPetScreen) {
                 // Hide AppBar and BottomNavigation for HealthTrackerViewPager
                 if (appBarLayout != null) {
                     appBarLayout.setVisibility(View.VISIBLE);

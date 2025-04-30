@@ -51,6 +51,7 @@ import java.util.concurrent.Executors;
 public class StartLoginScreen extends Fragment {
     private TextInputEditText emailInput, passwordInput;
     private TextInputLayout emailLayout, passwordLayout;
+    private TextView signupLink, forgotPasswordLink;
     private MaterialButton loginButton, googleSignInButton;
     private FirebaseAuth mAuth;
     private CredentialManager credentialManager;
@@ -83,11 +84,19 @@ public class StartLoginScreen extends Fragment {
         loginButton = view.findViewById(R.id.login_button);
         googleSignInButton = view.findViewById(R.id.google_button);
 
+
         // Set signup link click listener
-        TextView signupLink = view.findViewById(R.id.signup_link);
+        signupLink = view.findViewById(R.id.signup_link);
         signupLink.setOnClickListener(v -> {
             NavController navController = Navigation.findNavController(view);
             navController.navigate(R.id.action_startLoginScreen_to_startSignUpScreen);
+        });
+
+        // Set forgot password link click listener
+        forgotPasswordLink = view.findViewById(R.id.forgot_password);
+        forgotPasswordLink.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(view);
+            navController.navigate(R.id.action_startLoginScreen_to_forgotPasswordScreen);
         });
 
         // Set login button click listener

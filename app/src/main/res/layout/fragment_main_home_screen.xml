@@ -18,6 +18,42 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <!-- No Pets View -->
+            <LinearLayout
+                android:id="@+id/no_pets_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="32dp"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="No Pets Added"
+                    android:textColor="@color/primary_color"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="Add a pet to get started!"
+                    android:textColor="@color/text_light"
+                    android:textSize="16sp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/add_pet_button"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Add Pet"
+                    android:textSize="16sp"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
             <!-- Pet Profile Card -->
             <androidx.cardview.widget.CardView
                 android:id="@+id/pet_profile_card"
@@ -61,6 +97,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/pet_name"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:text="Buddy"
@@ -69,6 +106,7 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/pet_details"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:alpha="0.9"
@@ -81,6 +119,7 @@
 
             <!-- Quick Actions -->
             <GridLayout
+                android:id="@+id/quick_actions"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="32dp"
@@ -214,6 +253,7 @@
 
             <!-- Upcoming Events Section -->
             <TextView
+                android:id="@+id/upcoming_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"
@@ -230,6 +270,7 @@
 
             <!-- Health Stats Section -->
             <LinearLayout
+                android:id="@+id/health_stats_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="12dp"

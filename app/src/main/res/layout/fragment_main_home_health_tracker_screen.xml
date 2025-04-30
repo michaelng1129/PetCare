@@ -4,8 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/background_light">
+    android:layout_height="match_parent">
 
     <!-- Main Content -->
     <androidx.core.widget.NestedScrollView
@@ -27,7 +26,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                android:layout_margin="8dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -36,8 +36,8 @@
                     android:padding="16dp">
 
                     <androidx.cardview.widget.CardView
-                        android:layout_width="60dp"
-                        android:layout_height="60dp"
+                        android:layout_width="50dp"
+                        android:layout_height="50dp"
                         app:cardCornerRadius="30dp"
                         app:cardBackgroundColor="@color/primary_light">
 
@@ -57,6 +57,7 @@
                         android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/pet_name"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Buddy"
@@ -65,9 +66,10 @@
                             android:textStyle="bold" />
 
                         <TextView
+                            android:id="@+id/pet_age"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Golden Retriever • 3 years old"
+                            android:text="3 years old"
                             android:textColor="@color/text_light"
                             android:textSize="14sp" />
                     </LinearLayout>
@@ -86,7 +88,8 @@
                 app:tabRippleColor="@color/primary_light"
                 android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="4dp">
+                app:cardElevation="4dp"
+                android:layout_margin="8dp">
 
                 <com.google.android.material.tabs.TabItem
                     android:layout_width="wrap_content"
@@ -108,7 +111,8 @@
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/health_tracker_view_pager"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent" />
+                android:layout_height="match_parent"
+                android:layout_margin="8dp"/>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

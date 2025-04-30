@@ -34,6 +34,9 @@
         <action
             android:id="@+id/action_startLoginScreen_to_startSignUpScreen"
             app:destination="@id/startSignUpScreen" />
+        <action
+            android:id="@+id/action_startLoginScreen_to_forgotPasswordScreen"
+            app:destination="@id/forgotPasswordScreen" />
     </fragment>
     <fragment
         android:id="@+id/startSignUpScreen"
@@ -49,5 +52,13 @@
         android:name="com.eee3457.petcare.startactivity.auth.StartOTPVerifyScreen"
         android:label="fragment_start_otpverify_screen"
         tools:layout="@layout/fragment_start_otpverify_screen" />
+    <fragment
+        android:id="@+id/forgotPasswordScreen"
+        android:name="com.eee3457.petcare.startactivity.auth.ForgotPasswordScreen"
+        android:label="ForgotPasswordScreen" >
+        <action
+            android:id="@+id/action_forgotPasswordScreen_to_startLoginScreen"
+            app:destination="@id/startLoginScreen" />
+    </fragment>
 
 </navigation>
