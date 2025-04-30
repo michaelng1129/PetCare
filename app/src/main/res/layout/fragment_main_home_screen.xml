@@ -170,7 +170,7 @@
 
                 <!-- Appointments Action -->
                 <androidx.cardview.widget.CardView
-                    android:id="@+id/appointments_action"
+                    android:id="@+id/video_action"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_columnWeight="1"
@@ -196,14 +196,14 @@
                                 android:layout_width="25dp"
                                 android:layout_height="25dp"
                                 android:layout_gravity="center"
-                                android:src="@drawable/ic_event"
+                                android:src="@drawable/ic_video_library"
                                 app:tint="@color/white" />
                         </androidx.cardview.widget.CardView>
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Appointments"
+                            android:text="Video"
                             android:textColor="@color/text_dark"
                             android:textSize="14sp" />
                     </LinearLayout>

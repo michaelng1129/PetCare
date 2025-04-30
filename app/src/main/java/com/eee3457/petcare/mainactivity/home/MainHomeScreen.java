@@ -109,6 +109,21 @@ public class MainHomeScreen extends Fragment {
             navController.navigate(R.id.action_mainHomeScreen_to_healthTrackerViewPager);
         });
 
+        View videoAction = view.findViewById(R.id.video_action);
+        videoAction.setOnClickListener(v -> {
+            NavController navController = Navigation.findNavController(view);
+            AppBarLayout appBarLayout = requireActivity().findViewById(R.id.appBarLayout);
+            BottomNavigationView bottomNav = requireActivity().findViewById(R.id.bottomNavigationView);
+            if (appBarLayout != null) {
+                appBarLayout.setVisibility(View.GONE);
+            }
+            if (bottomNav != null) {
+                bottomNav.setVisibility(View.GONE);
+            }
+            navController.navigate(R.id.action_mainHomeScreen_to_clipsScreen);
+
+        });
+
         // Load pet data from Firestore
         loadPetData();
     }
@@ -210,30 +225,26 @@ public class MainHomeScreen extends Fragment {
     }
 
     private void checkAndUploadFakeEvents(String userId, String petId) {
-        ListenerRegistration listener = db.collection("users").document(userId).collection("pets").document(petId).collection("events")
-                .addSnapshotListener((querySnapshot, e) -> {
-                    if (e != null) {
-                        Log.e(TAG, "Failed to check events: " + e.getMessage(), e);
-                        return;
-                    }
+        ListenerRegistration listener = db.collection("users").document(userId).collection("pets").document(petId).collection("events").addSnapshotListener((querySnapshot, e) -> {
+            if (e != null) {
+                Log.e(TAG, "Failed to check events: " + e.getMessage(), e);
+                return;
+            }
 
-                    if (querySnapshot == null || querySnapshot.isEmpty()) {
-                        // No events found, upload fake data
-                        List<Map<String, Object>> fakeEvents = generateFakeEvents();
-                        for (Map<String, Object> event : fakeEvents) {
-                            db.collection("users").document(userId).collection("pets").document(petId).collection("events")
-                                    .add(event)
-                                    .addOnSuccessListener(docRef -> {
-                                        Log.d(TAG, "Fake event added with ID: " + docRef.getId());
-                                    })
-                                    .addOnFailureListener(e1 -> {
-                                        Log.e(TAG, "Failed to add fake event: " + e1.getMessage(), e1);
-                                    });
-                        }
-                    } else {
-                        Log.d(TAG, "Events already exist, skipping fake data upload");
-                    }
-                });
+            if (querySnapshot == null || querySnapshot.isEmpty()) {
+                // No events found, upload fake data
+                List<Map<String, Object>> fakeEvents = generateFakeEvents();
+                for (Map<String, Object> event : fakeEvents) {
+                    db.collection("users").document(userId).collection("pets").document(petId).collection("events").add(event).addOnSuccessListener(docRef -> {
+                        Log.d(TAG, "Fake event added with ID: " + docRef.getId());
+                    }).addOnFailureListener(e1 -> {
+                        Log.e(TAG, "Failed to add fake event: " + e1.getMessage(), e1);
+                    });
+                }
+            } else {
+                Log.d(TAG, "Events already exist, skipping fake data upload");
+            }
+        });
         eventListeners.add(listener);
     }
 
@@ -241,11 +252,7 @@ public class MainHomeScreen extends Fragment {
         List<Map<String, Object>> events = new ArrayList<>();
         Random random = new Random();
         String[] titles = {"Vet Appointment", "Flea Medication", "Grooming Session"};
-        String[] descriptions = {
-                "Annual checkup with Dr. Smith",
-                "Administer monthly flea treatment",
-                "Bath and grooming at Pet Salon"
-        };
+        String[] descriptions = {"Annual checkup with Dr. Smith", "Administer monthly flea treatment", "Bath and grooming at Pet Salon"};
         String[] icons = {"ic_medical_services", "ic_medication", "ic_shower"};
 
         // Generate 3 fake events in 2025
@@ -315,52 +322,51 @@ public class MainHomeScreen extends Fragment {
     }
 
     private void loadUpcomingEvents(String userId, String petId) {
-        ListenerRegistration listener = db.collection("users").document(userId).collection("pets").document(petId).collection("events")
-                .addSnapshotListener((querySnapshot, e) -> {
-                    if (e != null) {
-                        if (isAdded()) {
-                            Toast.makeText(requireContext(), "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                        }
-                        Log.e(TAG, "Failed to load events: " + e.getMessage(), e);
-                        return;
+        ListenerRegistration listener = db.collection("users").document(userId).collection("pets").document(petId).collection("events").addSnapshotListener((querySnapshot, e) -> {
+            if (e != null) {
+                if (isAdded()) {
+                    Toast.makeText(requireContext(), "Failed to load events: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+                Log.e(TAG, "Failed to load events: " + e.getMessage(), e);
+                return;
+            }
+
+            if (isAdded()) {
+                upcomingEventsContainer.removeAllViews();
+            }
+            for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
+                String title = doc.getString("title");
+                String description = doc.getString("description");
+                String day = doc.getString("day");
+                String month = doc.getString("month");
+                String year = doc.getString("year");
+                String iconResId = doc.getString("iconResId"); // Store as string or map to resource
+
+                if (isAdded()) {
+                    View cardView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_main_home_screen_event_card, upcomingEventsContainer, false);
+                    TextView titleView = cardView.findViewById(R.id.eventTitle);
+                    TextView descView = cardView.findViewById(R.id.eventDesc);
+                    TextView dayView = cardView.findViewById(R.id.eventDay);
+                    TextView monthView = cardView.findViewById(R.id.eventMonth);
+                    ImageView iconView = cardView.findViewById(R.id.eventIcon);
+
+                    titleView.setText(title);
+                    descView.setText(description);
+                    dayView.setText(day);
+                    monthView.setText(convertMonthNumberToName(month));
+                    // Map iconResId to actual resource (simplified example)
+                    if ("ic_medical_services".equals(iconResId)) {
+                        iconView.setImageResource(R.drawable.ic_medical_services);
+                    } else if ("ic_medication".equals(iconResId)) {
+                        iconView.setImageResource(R.drawable.ic_medication);
+                    } else if ("ic_shower".equals(iconResId)) {
+                        iconView.setImageResource(R.drawable.ic_shower);
                     }
 
-                    if (isAdded()) {
-                        upcomingEventsContainer.removeAllViews();
-                    }
-                    for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        String title = doc.getString("title");
-                        String description = doc.getString("description");
-                        String day = doc.getString("day");
-                        String month = doc.getString("month");
-                        String year = doc.getString("year");
-                        String iconResId = doc.getString("iconResId"); // Store as string or map to resource
-
-                        if (isAdded()) {
-                            View cardView = LayoutInflater.from(getContext()).inflate(R.layout.fragment_main_home_screen_event_card, upcomingEventsContainer, false);
-                            TextView titleView = cardView.findViewById(R.id.eventTitle);
-                            TextView descView = cardView.findViewById(R.id.eventDesc);
-                            TextView dayView = cardView.findViewById(R.id.eventDay);
-                            TextView monthView = cardView.findViewById(R.id.eventMonth);
-                            ImageView iconView = cardView.findViewById(R.id.eventIcon);
-
-                            titleView.setText(title);
-                            descView.setText(description);
-                            dayView.setText(day);
-                            monthView.setText(convertMonthNumberToName(month));
-                            // Map iconResId to actual resource (simplified example)
-                            if ("ic_medical_services".equals(iconResId)) {
-                                iconView.setImageResource(R.drawable.ic_medical_services);
-                            } else if ("ic_medication".equals(iconResId)) {
-                                iconView.setImageResource(R.drawable.ic_medication);
-                            } else if ("ic_shower".equals(iconResId)) {
-                                iconView.setImageResource(R.drawable.ic_shower);
-                            }
-
-                            upcomingEventsContainer.addView(cardView);
-                        }
-                    }
-                });
+                    upcomingEventsContainer.addView(cardView);
+                }
+            }
+        });
         eventListeners.add(listener);
     }
 

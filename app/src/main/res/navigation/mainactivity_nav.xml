@@ -16,6 +16,9 @@
         <action
             android:id="@+id/action_mainHomeScreen_to_addPetScreen"
             app:destination="@id/addPetScreen" />
+        <action
+            android:id="@+id/action_mainHomeScreen_to_clipsScreen"
+            app:destination="@id/clipsScreen" />
     </fragment>
     <fragment
         android:id="@+id/mainCareScreen"
@@ -37,6 +40,14 @@
         android:label="AddPetScreen" >
         <action
             android:id="@+id/action_addPetScreen_to_mainHomeScreen"
+            app:destination="@id/mainHomeScreen" />
+    </fragment>
+    <fragment
+        android:id="@+id/clipsScreen"
+        android:name="com.eee3457.petcare.mainactivity.home.ClipsScreen"
+        android:label="ClipsScreen" >
+        <action
+            android:id="@+id/action_clipsScreen_to_mainHomeScreen"
             app:destination="@id/mainHomeScreen" />
     </fragment>
 </navigation>
